@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>My Applications</title>
+
+<style>
+
+body{
+
+font-family:Arial;
+padding:30px;
+background:#f5f7fa;
+
+}
+
+h1{
+
+text-align:center;
+margin-bottom:30px;
+
+}
+
+#applications{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(300px,1fr));
+
+gap:20px;
+
+}
+
+.card{
+
+background:white;
+
+padding:20px;
+
+border-radius:15px;
+
+box-shadow:
+0px 4px 10px rgba(
+0,0,0,0.1
+);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>
+My Applications
+</h1>
+
+<div id="applications">
+
+</div>
+
+<script>
+
+async function loadApplications(){
+
+try{
+
+const response =
+await fetch(
+
+"http://127.0.0.1:8000/my_applications?user_id=" 
++ localStorage.getItem(
+"user_id"
+)
+
+);
+
+const data =
+await response.json();
+
+let html = "";
+
+data.applications.forEach(job=>{
+
+html += `
+
+<div class="card">
+
+<h2>
+${job.title}
+</h2>
+
+<p>
+${job.description}
+</p>
+
+<p>
+
+<b>Skills:</b>
+
+${job.skills}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+document.getElementById(
+"applications"
+).innerHTML = html;
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Error loading applications"
+);
+
+}
+
+}
+
+loadApplications();
+
+</script>
+
+</body>
+
+</html>
