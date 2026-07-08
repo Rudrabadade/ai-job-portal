@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Recruiter Dashboard</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f5f7fa;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.form-box,
+.card,
+.stat-card{
+
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0px 4px 10px rgba(0,0,0,0.1);
+
+}
+
+.form-box{
+    margin-bottom:30px;
+    display:none;
+}
+
+.card{
+
+transition:0.3s;
+
+}
+
+.card:hover{
+
+transform:translateY(-5px);
+
+}
+
+input,textarea{
+
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    margin-bottom:15px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+
+}
+
+textarea{
+    resize:none;
+}
+
+#jobsContainer,
+#candidateList,
+#statsContainer{
+
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:20px;
+margin-top:20px;
+
+}
+
+.stat-card{
+
+text-align:center;
+font-size:20px;
+font-weight:bold;
+padding:25px;
+transition:0.3s;
+
+}
+
+.stat-card:hover{
+
+transform:translateY(-5px);
+
+}
+
+.score{
+
+color:green;
+font-size:24px;
+font-weight:bold;
+
+}
+
+button{
+
+padding:12px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+color:white;
+margin:5px;
+background:#4CAF50;
+font-weight:bold;
+transition:0.3s;
+
+}
+
+button:hover{
+
+transform:scale(1.05);
+
+}
+
+.shortlist-btn{
+
+background:#2196F3;
+
+}
+
+.reject-btn{
+
+background:#f44336;
+
+}
+
+.resume-btn{
+
+background:#673ab7;
+
+}
+
+.disabled{
+
+opacity:0.5;
+pointer-events:none;
+
+}
+
+.skill-tag{
+
+display:inline-block;
+background:#e8f5e9;
+color:#2e7d32;
+padding:6px 12px;
+margin:4px;
+border-radius:20px;
+font-size:14px;
+
+}
+
+.toggle-btn{
+
+font-size:16px;
+
+}
+
+.pending{
+
+color:#ff9800;
+font-weight:bold;
+
+}
+
+.shortlisted{
+
+color:green;
+font-weight:bold;
+
+}
+
+.rejected{
+
+color:red;
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Recruiter Dashboard</h1>
+
+<button
+class="toggle-btn"
+onclick="toggleForm()"
+id="toggleBtn">
+
++ Post New Job
+
+</button>
+
+<div class="form-box" id="jobForm">
+
+<h2>Post New Job</h2>
+
+<input
+id="title"
+placeholder="Job Title">
+
+<textarea
+id="description"
+placeholder="Job Description"
+rows="4"></textarea>
+
+<input
+id="skills"
+placeholder="Skills (Python, FastAPI, PostgreSQL)">
+
+<input
+id="recruiter"
+value="Bruce Wayne">
+
+<button onclick="postJob()">
+
+Post Job
+
+</button>
+
+</div>
+
+<h2>Posted Jobs</h2>
+<div id="jobsContainer"></div>
+
+<h2>Recruiter Insights</h2>
+<div id="statsContainer"></div>
+
+<h2>Candidates</h2>
+<div id="candidateList"></div>
+
+<script>
+
+function toggleForm(){
+
+const form=document.getElementById("jobForm");
+const btn=document.getElementById("toggleBtn");
+
+if(form.style.display==="none"||form.style.display===""){
+
+form.style.display="block";
+btn.innerText="✖ Close";
+
+}else{
+
+form.style.display="none";
+btn.innerText="+ Post New Job";
+
+}
+
+}
+
+async function postJob(){
+
+const title=document.getElementById("title").value.trim();
+const description=document.getElementById("description").value.trim();
+const skills=document.getElementById("skills").value.trim();
+const recruiter=document.getElementById("recruiter").value.trim();
+
+if(!title || !description || !skills){
+
+alert("Please fill all fields");
+return;
+
+}
+
+try{
+
+const response=await fetch(
+"http://127.0.0.1:8000/jobs",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+
+title:title,
+description:description,
+skills:skills,
+recruiter_name:recruiter
+
+})
+}
+);
+
+if(response.ok){
+
+alert("Job posted successfully");
+
+title.value="";
+description.value="";
+skills.value="";
+
+loadJobs();
+toggleForm();
+
+}
+
+}catch(error){
+
+console.log(error);
+
+}
+
+}
+
+async function loadJobs(){
+
+const response=await fetch(
+"http://127.0.0.1:8000/jobs"
+);
+
+const data=await response.json();
+
+let html="";
+
+data.jobs.forEach(job=>{
+
+html+=`
+
+<div class="card">
+
+<h3>${job.title}</h3>
+
+<p>${job.description}</p>
+
+<button onclick="loadCandidates(${job.id})">
+
+View Candidates
+
+</button>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("jobsContainer").innerHTML=html;
+
+}
+
+async function updateStatus(candidateId,status){
+
+await fetch(
+
+`http://127.0.0.1:8000/candidate-status/${candidateId}?status=${status}`,
+{
+method:"PUT"
+}
+
+);
+
+location.reload();
+
+}
+
+async function loadCandidates(jobId){
+
+const response=await fetch(
+`http://127.0.0.1:8000/candidates/${jobId}`
+);
+
+const data=await response.json();
+
+let html="";
+
+let total=0;
+let shortlisted=0;
+let rejected=0;
+let pending=0;
+let topCandidate=null;
+
+if(data.candidates){
+
+total=data.candidates.length;
+
+data.candidates.forEach(candidate=>{
+
+if(candidate.status==="Shortlisted")
+shortlisted++;
+
+else if(candidate.status==="Rejected")
+rejected++;
+
+else
+pending++;
+
+if(!topCandidate ||
+candidate.match_score>
+topCandidate.match_score){
+
+topCandidate=candidate;
+
+}
+
+});
+
+}
+
+document.getElementById("statsContainer").innerHTML=`
+
+<div class="stat-card">Total<br>${total}</div>
+<div class="stat-card">Pending<br>${pending}</div>
+<div class="stat-card">Shortlisted<br>${shortlisted}</div>
+<div class="stat-card">Rejected<br>${rejected}</div>
+<div class="stat-card">
+
+Top Candidate<br>
+
+${topCandidate ?
+topCandidate.name+
+" ("+
+topCandidate.match_score.toFixed(2)+"%)"
+:"None"}
+
+</div>
+
+`;
+
+data.candidates.forEach((candidate,index)=>{
+
+let skillsHTML="";
+
+if(candidate.matched_skills){
+
+candidate.matched_skills.split(",").forEach(skill=>{
+
+skillsHTML+=`<span class="skill-tag">${skill.trim()}</span>`;
+
+});
+
+}else{
+
+skillsHTML="No matching skills found";
+
+}
+
+let statusClass="pending";
+
+if(candidate.status==="Shortlisted")
+statusClass="shortlisted";
+
+if(candidate.status==="Rejected")
+statusClass="rejected";
+
+let cleanName=
+candidate.resume_filename
+.split("_")
+.slice(1)
+.join("_");
+
+html+=`
+
+<div class="card">
+
+<h3>${index+1}. ${candidate.name}</h3>
+
+<p><b>Resume:</b> ${cleanName}</p>
+
+<p class="score">
+AI Match: ${candidate.match_score.toFixed(2)}%
+</p>
+
+<p><b>Matched Skills:</b></p>
+
+${skillsHTML}
+
+<p>
+
+<b>Status:</b>
+
+<span class="${statusClass}">
+${candidate.status}
+</span>
+
+</p>
+
+<button
+class="shortlist-btn ${candidate.status==='Shortlisted' ? 'disabled':''}"
+onclick="updateStatus(${candidate.id},'Shortlisted')">
+
+Shortlist
+
+</button>
+
+<button
+class="reject-btn ${candidate.status==='Rejected' ? 'disabled':''}"
+onclick="updateStatus(${candidate.id},'Rejected')">
+
+Reject
+
+</button>
+
+<br><br>
+
+<a
+href="http://127.0.0.1:8000/resumes/${candidate.resume_filename}"
+target="_blank">
+
+<button class="resume-btn">
+
+View Resume
+
+</button>
+
+</a>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("candidateList").innerHTML=html;
+
+}
+
+loadJobs();
+
+</script>
+
+</body>
+</html>
