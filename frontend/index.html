@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Ranker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>AI Resume Ranker</h1>
+
+        <h3>Upload Resumes</h3>
+
+        <input type="file" id="resumes" multiple>
+
+        <br><br>
+
+        <textarea
+            id="jobDescription"
+            rows="10"
+            cols="50"
+            placeholder="Paste Job Description Here..."
+        ></textarea>
+
+        <br><br>
+
+        <button id="rankBtn" type="button">
+            Rank Resumes
+        </button>
+
+        <br><br>
+
+        <div id="results">
+            Results will appear here...
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

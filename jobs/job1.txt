@@ -1,0 +1,8 @@
+Python Developer
+
+Skills:
+Python
+SQL
+FastAPI
+Machine Learning
+Git

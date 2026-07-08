@@ -1,0 +1,10 @@
+Name: Amit
+
+Skills:
+Java
+Spring Boot
+MySQL
+python 
+html
+css
+jango
