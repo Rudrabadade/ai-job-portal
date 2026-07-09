@@ -1,0 +1,24 @@
+# Core dependencies for AI Job Portal
+# Install with: pip install -r requirements-core.txt
+
+# Web framework
+fastapi>=0.115.0
+uvicorn>=0.30.0
+
+# Database
+psycopg2-binary>=2.9.9
+
+# AI / ML
+scikit-learn>=1.4.0
+
+# PDF parsing
+pypdf>=4.0.0
+
+# Form data handling
+python-multipart>=0.0.9
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Data validation
+pydantic>=2.6.0

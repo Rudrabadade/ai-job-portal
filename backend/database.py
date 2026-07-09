@@ -1,14 +1,15 @@
 import psycopg2
+import os
 
 
 def get_connection():
 
     conn = psycopg2.connect(
-        host="localhost",
-        database="ai_resume_ranker",
-        user="postgres",
-        password="285600",
-        port="5432"
+        host=os.environ.get("DB_HOST", "localhost"),
+        database=os.environ.get("DB_NAME", "ai_resume_ranker"),
+        user=os.environ.get("DB_USER", "postgres"),
+        password=os.environ.get("DB_PASSWORD", ""),
+        port=os.environ.get("DB_PORT", "5432")
     )
 
     return conn
@@ -26,7 +27,7 @@ def save_ranking(
 
     cursor.execute(
         """
-        INSERT INTO rankings (filename,match_score,job_description)
+        INSERT INTO rankings (filename, match_score, job_description)
         VALUES (%s, %s, %s)
         """,
         (
@@ -36,7 +37,7 @@ def save_ranking(
         )
     )
 
-    conn.commit() #save changes
+    conn.commit()
 
     cursor.close()
 
@@ -108,6 +109,7 @@ def get_all_jobs():
 
     return jobs
 
+
 def get_job_by_id(job_id):
 
     conn = get_connection()
@@ -116,12 +118,7 @@ def get_job_by_id(job_id):
 
     cursor.execute(
         """
-        SELECT
-            id,
-            title,
-            description,
-            skills,
-            recruiter_name
+        SELECT *
         FROM jobs
         WHERE id = %s
         """,
@@ -134,6 +131,7 @@ def get_job_by_id(job_id):
     conn.close()
 
     return job
+
 
 def register_user(
     full_name,
@@ -155,7 +153,7 @@ def register_user(
             password,
             role
         )
-        VALUES (%s,%s,%s,%s)
+        VALUES (%s, %s, %s, %s)
         """,
         (
             full_name,
@@ -171,7 +169,7 @@ def register_user(
     conn.close()
 
 
-def login_user(email,password):
+def login_user(email, password):
 
     conn = get_connection()
 
@@ -197,6 +195,7 @@ def login_user(email,password):
 
     return user
 
+
 def apply_job(user_id, job_id):
 
     conn = get_connection()
@@ -217,6 +216,7 @@ def apply_job(user_id, job_id):
     cursor.close()
 
     conn.close()
+
 
 def get_user_applications(user_id):
 
@@ -247,6 +247,7 @@ def get_user_applications(user_id):
 
     return jobs
 
+
 def save_candidate(
     name,
     skills,
@@ -266,7 +267,7 @@ def save_candidate(
             resume_filename,
             job_id
         )
-        VALUES (%s,%s,%s,%s,%s)
+        VALUES (%s, %s, %s, %s, %s)
         RETURNING id
     """,
     (
@@ -285,32 +286,6 @@ def save_candidate(
 
     return candidate_id
 
-def get_candidates_by_job(job_id):
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT
-            id,
-            resume_filename,
-            match_score,
-            status,
-            applied_at
-        FROM applications
-        WHERE job_id = %s
-        ORDER BY match_score DESC
-        """,
-        (job_id,)
-    )
-
-    candidates = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return candidates
 
 def get_candidates_by_job(job_id):
 
@@ -341,6 +316,7 @@ def get_candidates_by_job(job_id):
 
     return candidates
 
+
 def update_match_score(
     candidate_id,
     score
@@ -367,7 +343,10 @@ def update_match_score(
     cursor.close()
     conn.close()
 
-def get_job_by_id(job_id):
+
+def get_candidate_status(
+    candidate_id
+):
 
     conn = get_connection()
 
@@ -375,19 +354,20 @@ def get_job_by_id(job_id):
 
     cursor.execute(
         """
-        SELECT *
-        FROM jobs
-        WHERE id = %s
+        SELECT status
+        FROM candidates
+        WHERE id=%s
         """,
-        (job_id,)
+        (candidate_id,)
     )
 
-    job = cursor.fetchone()
+    status = cursor.fetchone()
 
     cursor.close()
     conn.close()
 
-    return job
+    return status
+
 
 def update_candidate_status(
     candidate_id,
@@ -417,9 +397,7 @@ def update_candidate_status(
         FROM candidates
         WHERE id=%s
         """,
-        (
-            candidate_id,
-        )
+        (candidate_id,)
     )
 
     result = cursor.fetchone()
@@ -447,58 +425,3 @@ def update_candidate_status(
     conn.close()
 
     return True
-
-
-
-def get_candidate_status(
-    candidate_id
-):
-
-    conn = get_connection()
-
-    cursor = conn.cursor()
-
-    cursor.execute(
-
-        """
-        SELECT status
-        FROM candidates
-        WHERE id=%s
-        """,
-
-        (candidate_id,)
-
-    )
-
-    status = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    return status
-
-def update_candidate_status(
-    candidate_id,
-    status
-):
-
-    conn = get_connection()
-
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        UPDATE candidates
-        SET status = %s
-        WHERE id = %s
-        """,
-        (
-            status,
-            candidate_id
-        )
-    )
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()

@@ -1,12 +1,17 @@
 # Python cache
 __pycache__/
 *.py[cod]
+*.pyo
 
 # Virtual environment
 venv/
+.venv/
+env/
 
-# Environment variables
+# Environment variables (NEVER commit these)
 .env
+.env.*
+!.env.example
 
 # VS Code
 .vscode/
@@ -20,3 +25,22 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Resume uploads (user data - do not commit)
+resumes/*.pdf
+resumes/*.txt
+resumes/*.doc
+resumes/*.docx
+
+# Test/temporary job files
+jobs/*.txt
+
+# Python egg / build artifacts
+*.egg-info/
+dist/
+build/
