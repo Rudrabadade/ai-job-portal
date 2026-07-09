@@ -3,7 +3,7 @@ async function loadCandidates() {
     try {
 
         const response = await fetch(
-            "http://127.0.0.1:8000/candidates"
+            "/candidates"
         );
 
         const data = await response.json();
@@ -41,7 +41,7 @@ async function loadCandidates() {
 
             Resume:
 
-            <a href="http://127.0.0.1:8000/resumes/${candidate.resume_filename}"
+            <a href="/resumes/${candidate.resume_filename}"
             target="_blank">
 
             ${candidate.resume_filename}

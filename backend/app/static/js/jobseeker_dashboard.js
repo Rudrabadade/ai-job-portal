@@ -3,7 +3,7 @@ async function loadJobs(){
     try{
 
         const response = await fetch(
-            "http://127.0.0.1:8000/jobs"
+            "/jobs"
         );
 
         const data = await response.json();
@@ -112,7 +112,7 @@ async function applyJob(jobId){
 
         const response =
         await fetch(
-            "http://127.0.0.1:8000/apply",
+            "/apply",
             {
                 method:"POST",
                 body:formData

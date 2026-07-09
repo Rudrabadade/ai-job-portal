@@ -1,4 +1,8 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from backend.text_extractor import extract_text
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
@@ -6,11 +10,19 @@ from backend.database import get_candidates_by_job
 from pydantic import BaseModel
 import shutil
 import os
+from pathlib import Path
 from fastapi.staticfiles import StaticFiles
+
+# Resolve project root (parent of backend/)
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Ensure resumes directory exists
+os.makedirs(BASE_DIR / "resumes", exist_ok=True)
+
 app = FastAPI()
 app.mount(
     "/resumes",
-    StaticFiles(directory="resumes"),
+    StaticFiles(directory=str(BASE_DIR / "resumes")),
     name="resumes"
 )
 
@@ -55,12 +67,10 @@ app.add_middleware(
 )
 
 
-# Home Route
+# Home Route — serve login page
 @app.get("/")
 def home():
-    return {
-        "message": "AI Job Portal API Running Successfully"
-    }
+    return FileResponse(str(BASE_DIR / "login.html"))
 
 
 # Resume Match API
@@ -634,5 +644,21 @@ async def change_candidate_status(
 
     }
 
+# Serve frontend HTML pages
+@app.get("/{page_name}.html")
+async def serve_page(page_name: str):
+    file_path = BASE_DIR / f"{page_name}.html"
+    if file_path.exists():
+        return FileResponse(str(file_path))
+    return {"error": "Page not found"}
+
+# Serve static assets (CSS, JS) — must be mounted LAST
+app.mount(
+    "/",
+    StaticFiles(directory=str(BASE_DIR)),
+    name="static"
+)
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=8000)

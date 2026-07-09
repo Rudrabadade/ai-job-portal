@@ -171,25 +171,61 @@ CREATE TABLE rankings (
 );
 ```
 
-### 6. Load environment variables and run the server
+### 6. Run the server locally
 
 ```bash
-# Load .env variables (PowerShell)
-Get-Content .env | ForEach-Object {
-    if ($_ -match '^(.+?)=(.*)$') {
-        [System.Environment]::SetEnvironmentVariable($Matches[1], $Matches[2])
-    }
-}
-
-# Start the FastAPI server
+# Start the FastAPI server (python-dotenv auto-loads .env)
 uvicorn backend.main:app --reload
 ```
 
 The API will be available at **http://127.0.0.1:8000**
 
-### 7. Open the frontend
+All frontend pages are served by FastAPI — just visit the URL in your browser.
 
-Open `index.html` (Register) or `login.html` (Login) directly in your browser.
+---
+
+## ☁️ Deploy to Render (Free — Live Website)
+
+### Step 1: Sign up at [render.com](https://render.com)
+- Use your **GitHub account** to sign up (free, no credit card)
+
+### Step 2: Create a PostgreSQL Database
+1. Go to **Dashboard** → **New** → **PostgreSQL**
+2. Name: `ai-job-portal-db`
+3. Plan: **Free**
+4. Click **Create Database**
+5. Wait for it to be ready, then copy the **Internal Database URL** and note the **Host**, **Database**, **Username**, **Password**, and **Port** from the "Connections" tab
+
+### Step 3: Create the Database Tables
+1. From the Render database page, click **Connect** → **PSQL Command**
+2. Copy the connection command and run it in your terminal
+3. Paste the SQL schema from the [Setup section above](#5-set-up-the-postgresql-database) to create all tables
+
+### Step 4: Create a Web Service
+1. Go to **Dashboard** → **New** → **Web Service**
+2. Connect your **GitHub repo** (`Rudrabadade/ai-job-portal`)
+3. Configure:
+   - **Name**: `ai-job-portal`
+   - **Runtime**: Python
+   - **Build Command**: `pip install -r requirements-core.txt`
+   - **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+   - **Plan**: Free
+4. Under **Environment Variables**, add:
+   | Key | Value |
+   |-----|-------|
+   | `DB_HOST` | *(from your Render database "Host")* |
+   | `DB_NAME` | *(from your Render database "Database")* |
+   | `DB_USER` | *(from your Render database "Username")* |
+   | `DB_PASSWORD` | *(from your Render database "Password")* |
+   | `DB_PORT` | `5432` |
+5. Click **Create Web Service**
+
+### Step 5: Your site is live! 🎉
+Your URL will be: `https://ai-job-portal-xxxx.onrender.com`
+
+> **Tip**: Render auto-deploys on every `git push` to your GitHub repo.
+
+> **Note**: Free tier services spin down after 15 min of inactivity. First request after idle may take ~30 seconds.
 
 ---
 
@@ -197,7 +233,7 @@ Open `index.html` (Register) or `login.html` (Login) directly in your browser.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/` | Health check |
+| GET | `/` | Home (serves login page) |
 | POST | `/register` | Register a new user |
 | POST | `/login` | Login and get user info |
 | GET | `/jobs` | Get all jobs |
@@ -209,7 +245,7 @@ Open `index.html` (Register) or `login.html` (Login) directly in your browser.
 | GET | `/rankings` | Get all resume rankings |
 | GET | `/test_db` | Test database connection |
 
-**Interactive API docs**: http://127.0.0.1:8000/docs
+**Interactive API docs**: http://127.0.0.1:8000/docs (local) or `https://your-app.onrender.com/docs` (live)
 
 ---
 
@@ -237,3 +273,4 @@ The resume scoring uses a **two-part scoring system**:
 ## 📄 License
 
 This project is open source and available for educational use.
+

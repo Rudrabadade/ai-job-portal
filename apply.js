@@ -32,7 +32,7 @@ formData.append("job_id", jobId);
 try{
 
 const response = await fetch(
-"http://127.0.0.1:8000/apply",
+"/apply",
 {
 method:"POST",
 body:formData

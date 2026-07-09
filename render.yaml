@@ -1,0 +1,36 @@
+databases:
+  - name: ai-job-portal-db
+    plan: free
+    databaseName: ai_resume_ranker
+    user: ai_portal_user
+
+services:
+  - type: web
+    name: ai-job-portal
+    plan: free
+    runtime: python
+    buildCommand: pip install -r requirements-core.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: ai-job-portal-db
+          property: host
+      - key: DB_NAME
+        fromDatabase:
+          name: ai-job-portal-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: ai-job-portal-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ai-job-portal-db
+          property: password
+      - key: DB_PORT
+        fromDatabase:
+          name: ai-job-portal-db
+          property: port
+      - key: PYTHON_VERSION
+        value: "3.11.0"

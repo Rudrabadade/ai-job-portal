@@ -273,7 +273,7 @@ return;
 try{
 
 const response=await fetch(
-"http://127.0.0.1:8000/jobs",
+"/jobs",
 {
 method:"POST",
 headers:{
@@ -314,7 +314,7 @@ console.log(error);
 async function loadJobs(){
 
 const response=await fetch(
-"http://127.0.0.1:8000/jobs"
+"/jobs"
 );
 
 const data=await response.json();
@@ -351,7 +351,7 @@ async function updateStatus(candidateId,status){
 
 await fetch(
 
-`http://127.0.0.1:8000/candidate-status/${candidateId}?status=${status}`,
+`/candidate-status/${candidateId}?status=${status}`,
 {
 method:"PUT"
 }
@@ -365,7 +365,7 @@ location.reload();
 async function loadCandidates(jobId){
 
 const response=await fetch(
-`http://127.0.0.1:8000/candidates/${jobId}`
+`/candidates/${jobId}`
 );
 
 const data=await response.json();
@@ -502,7 +502,7 @@ Reject
 <br><br>
 
 <a
-href="http://127.0.0.1:8000/resumes/${candidate.resume_filename}"
+href="/resumes/${candidate.resume_filename}"
 target="_blank">
 
 <button class="resume-btn">
