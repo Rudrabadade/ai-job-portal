@@ -16,14 +16,14 @@ def rank_resumes(job_description):
             with open(filepath, "r", encoding="utf-8") as file:
                 resume_text = file.read()
 
-            score = calculate_match(
+            result = calculate_match(
                 resume_text,
                 job_description
             )
 
             results.append({
                 "filename": filename,
-                "match_score": score
+                "match_score": float(result["score"])
             })
 
     results.sort(

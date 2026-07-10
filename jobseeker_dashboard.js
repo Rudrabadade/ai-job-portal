@@ -110,6 +110,11 @@ async function applyJob(jobId){
             fileInput.files[0]
         );
 
+        formData.append(
+            "user_id",
+            localStorage.getItem("user_id")
+        );
+
         const response =
         await fetch(
             "/apply",

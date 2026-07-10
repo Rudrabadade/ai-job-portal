@@ -28,6 +28,10 @@ formData.append("skills", skills);
 formData.append("experience", experience);
 formData.append("resume", resume);
 formData.append("job_id", jobId);
+const userId = localStorage.getItem("user_id");
+if (userId) {
+    formData.append("user_id", userId);
+}
 
 try{
 

@@ -1,17 +1,12 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import FileResponse
-from backend.text_extractor import extract_text
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from typing import List
-from backend.database import get_candidates_by_job
 from pydantic import BaseModel
 import shutil
 import os
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
 
 # Resolve project root (parent of backend/)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +24,6 @@ app.mount(
 from backend.resume_matcher import calculate_match
 from backend.resume_ranker import rank_resumes
 from backend.text_extractor import extract_text
-from backend.database import get_connection
 from backend.database import (
     get_job_by_id,
     get_connection,
@@ -80,12 +74,11 @@ def match_resume(
     job_description: str
 ):
 
-    score = float(
-        calculate_match(
-            resume,
-            job_description
-        )
+    result = calculate_match(
+        resume,
+        job_description
     )
+    score = float(result["score"])
 
     return {
         "match_score": score
@@ -103,12 +96,11 @@ async def upload_resume(
 
         resume_text = extract_text(file)
 
-        score = float(
-            calculate_match(
-                resume_text,
-                job_description
-            )
+        result = calculate_match(
+            resume_text,
+            job_description
         )
+        score = float(result["score"])
 
         save_ranking(
             file.filename,
@@ -163,12 +155,11 @@ async def rank_uploaded_resumes(
 
             print("Text extracted successfully")
 
-            score = float(
-                calculate_match(
-                    resume_text,
-                    job_description
-                )
+            result = calculate_match(
+                resume_text,
+                job_description
             )
+            score = float(result["score"])
 
             save_ranking(
                 file.filename,
@@ -421,7 +412,8 @@ async def upload_candidate_application(
 
     name: str = Form(...),
     job_id: int = Form(...),
-    resume: UploadFile = File(...)
+    resume: UploadFile = File(...),
+    user_id: int = Form(None)
 
 ):
 
@@ -538,16 +530,18 @@ async def upload_candidate_application(
             INSERT INTO applications
             (
                 job_id,
+                user_id,
                 resume_filename,
                 match_score,
                 status
             )
             VALUES
-            (%s,%s,%s,%s)
+            (%s,%s,%s,%s,%s)
             """,
             (
 
                 job_id,
+                user_id,
                 unique_filename,
                 match_score,
                 "Pending"
