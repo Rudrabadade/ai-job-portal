@@ -15,6 +15,77 @@ def get_connection():
     return conn
 
 
+def init_db():
+    """Create all required tables if they don't exist."""
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS jobs (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(255),
+            description TEXT,
+            skills TEXT,
+            recruiter_name VARCHAR(255),
+            status VARCHAR(50) DEFAULT 'Open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS job_seekers (
+            id SERIAL PRIMARY KEY,
+            full_name VARCHAR(255),
+            email VARCHAR(255) UNIQUE,
+            password VARCHAR(255),
+            role VARCHAR(50),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS candidates (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255),
+            skills TEXT,
+            match_score NUMERIC(5,2),
+            resume_filename VARCHAR(500),
+            job_id INTEGER REFERENCES jobs(id),
+            status VARCHAR(50) DEFAULT 'Pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS applications (
+            id SERIAL PRIMARY KEY,
+            job_id INTEGER REFERENCES jobs(id),
+            user_id INTEGER REFERENCES job_seekers(id),
+            resume_filename VARCHAR(500),
+            match_score NUMERIC(5,2),
+            status VARCHAR(50) DEFAULT 'Pending',
+            applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS rankings (
+            id SERIAL PRIMARY KEY,
+            filename VARCHAR(500),
+            match_score NUMERIC(5,2),
+            job_description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    print("Database tables initialized successfully")
+
+
 def save_ranking(
     filename,
     match_score,

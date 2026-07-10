@@ -25,6 +25,7 @@ from backend.resume_matcher import calculate_match
 from backend.resume_ranker import rank_resumes
 from backend.text_extractor import extract_text
 from backend.database import (
+    init_db,
     get_job_by_id,
     get_connection,
     save_ranking,
@@ -39,6 +40,11 @@ from backend.database import (
     get_candidates_by_job,
     update_candidate_status
 )
+
+# Initialize database tables on startup
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
 
 
