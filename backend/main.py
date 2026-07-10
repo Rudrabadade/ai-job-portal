@@ -330,16 +330,26 @@ async def register(
     role: str = Form(...)
 ):
 
-    register_user(
-        full_name,
-        email,
-        password,
-        role
-    )
+    try:
 
-    return {
-        "message":"User registered successfully"
-    }
+        register_user(
+            full_name,
+            email,
+            password,
+            role
+        )
+
+        return {
+            "message":"User registered successfully"
+        }
+
+    except Exception as e:
+
+        print("REGISTER ERROR:", e)
+
+        return {
+            "message": f"Registration failed: {str(e)}"
+        }
 
 
 @app.post("/login")

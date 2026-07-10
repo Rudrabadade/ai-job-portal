@@ -147,8 +147,15 @@ await response.json();
 
 alert(data.message);
 
+if(
+data.message &&
+data.message.includes("successfully")
+){
+
 window.location.href=
 "login.html";
+
+}
 
 }
 
